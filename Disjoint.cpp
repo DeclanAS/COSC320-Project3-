@@ -2,7 +2,7 @@
 
 Disjoint::Disjoint()
 {
-    // Default
+    // Default Constructor
 }
 
 Disjoint::Disjoint(int num_pixels)

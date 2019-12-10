@@ -53,17 +53,17 @@ public:
      * Guassian Blur: https://en.wikipedia.org/wiki/Gaussian_blur
      */
     
-    void SegmentImage(cv::Mat &image, int c, int min_size);
+    void SegmentImage(cv::Mat &image, int threshold, int min_size);
 
-    /* For the diff() function we used opencv: 'cv::Vec3f', 'cv::Mat'
+    /* For the Dif() function we used opencv: 'cv::Vec3f', 'cv::Mat'
     * 
     * Euclidean Distance: https://en.wikipedia.org/wiki/Euclidean_distance
     * opencv: https://docs.opencv.org/3.4/dc/d84/group__core__basic.html
     * 
-    * finds diff of two pixels by performing the euclidian diastance algolrithm using dot product
+    * finds difference of two pixels by performing the euclidian diastance algolrithm using dot product
     */
     
-    float diff(const cv::Mat &image, int q1, int p1, int q2, int p2);
+    float Dif(const cv::Mat &image, int q1, int p1, int q2, int p2);
 
     /* Builds the graph
     * References 'Huttenlocher' paper on construction of pixels into the graph
@@ -76,7 +76,7 @@ public:
     * References 'Huttenlocher' paper on disjoint sets and forest
     */
     
-    Disjoint segment_graph(int num_vertices, std::vector<Edge> &edges, float c);
+    Disjoint segment_graph(int num_vertices, std::vector<Edge> &edges, float threshold);
 
 private:
     

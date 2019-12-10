@@ -3,10 +3,10 @@
 
 Graph::Graph()
 {
-    // Default
+    // Default Constructor
 }
 
-void Graph::SegmentImage(cv::Mat &image, int c, int min_size)
+void Graph::SegmentImage(cv::Mat &image, int threshold, int min_size)
 {
     int height = image.rows;
     int width = image.cols;
@@ -19,7 +19,7 @@ void Graph::SegmentImage(cv::Mat &image, int c, int min_size)
     smoothed.convertTo(smoothed, CV_32FC3);
     GaussianBlur(smoothed, smoothed, cv::Size(5, 5), 0.5);
     std::vector<Edge> edges = build_graph(smoothed);
-    Disjoint forest = segment_graph(height * width, edges, c);
+    Disjoint forest = segment_graph(height * width, edges, threshold);
 
     // sort vector pixels and merge into forest
     for (Edge &edge : edges)
@@ -69,7 +69,7 @@ void Graph::ForestColor(cv::Mat &image, Disjoint &forest)
     }
 }
 
-float Graph::diff(const cv::Mat &image, int q1, int p1, int q2, int p2)
+float Graph::Dif(const cv::Mat &image, int q1, int p1, int q2, int p2)
 {
     // get the (r,g,b) of two verticies/pixels
     cv::Vec3f pix1 = image.at<cv::Vec3f>(p1, q1);
@@ -96,7 +96,7 @@ std::vector<Edge> Graph::build_graph(const cv::Mat &image)
             {
                 edges[num].a = current;
                 edges[num].b = width * y + (x - 1);
-                edges[num].weight = diff(image, x, y, x - 1, y);
+                edges[num].weight = Dif(image, x, y, x - 1, y);
                 num++;
             }
 
@@ -104,7 +104,7 @@ std::vector<Edge> Graph::build_graph(const cv::Mat &image)
             {
                 edges[num].a = current;
                 edges[num].b = width * (y - 1) + x;
-                edges[num].weight = diff(image, x, y, x, y - 1);
+                edges[num].weight = Dif(image, x, y, x, y - 1);
                 num++;
             }
 
@@ -112,7 +112,7 @@ std::vector<Edge> Graph::build_graph(const cv::Mat &image)
             {
                 edges[num].a = current;
                 edges[num].b = width * (y - 1) + (x - 1);
-                edges[num].weight = diff(image, x, y, x - 1, y - 1);
+                edges[num].weight = Dif(image, x, y, x - 1, y - 1);
                 num++;
             }
 
@@ -120,7 +120,7 @@ std::vector<Edge> Graph::build_graph(const cv::Mat &image)
             {
                 edges[num].a = current;
                 edges[num].b = width * (y + 1) + (x - 1);
-                edges[num].weight = diff(image, x, y, x - 1, y + 1);
+                edges[num].weight = Dif(image, x, y, x - 1, y + 1);
                 num++;
             }
         }
@@ -129,14 +129,14 @@ std::vector<Edge> Graph::build_graph(const cv::Mat &image)
     return edges;
 }
 
-Disjoint Graph::segment_graph(int num_vertices, std::vector<Edge> &edges, float c)
+Disjoint Graph::segment_graph(int num_vertices, std::vector<Edge> &edges, float threshold)
 {
     // Sort the edges by weight
     sort(edges.begin(), edges.end());
     // Creates a forest from the edges
     Disjoint forest = Disjoint(edges.size());
     // Threshold is given by user
-    std::vector<float> thresholds(static_cast<unsigned long>(num_vertices), c);
+    std::vector<float> thresholds(static_cast<unsigned long>(num_vertices), threshold);
 
     // Iterate each edge over all edges
     /*
@@ -158,7 +158,7 @@ Disjoint Graph::segment_graph(int num_vertices, std::vector<Edge> &edges, float 
         {
             forest.merge(a, b);
             a = forest.find(a);
-            thresholds[a] = edge.weight + c / forest.size(a);
+            thresholds[a] = edge.weight + threshold / forest.size(a);
         }
     }
     // return the forest
