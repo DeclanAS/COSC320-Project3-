@@ -3,6 +3,7 @@
 
 Graph::Graph()
 {
+    // Default
 }
 
 void Graph::SegmentImage(cv::Mat &image, int c, int min_size)
@@ -13,10 +14,10 @@ void Graph::SegmentImage(cv::Mat &image, int c, int min_size)
     /* What this does is perforam a blur on all of the pixels
     *  of the images to make segmentation easier
     */
+    
     cv::Mat smoothed(image);
     smoothed.convertTo(smoothed, CV_32FC3);
     GaussianBlur(smoothed, smoothed, cv::Size(5, 5), 0.5);
-
     std::vector<Edge> edges = build_graph(smoothed);
     Disjoint forest = segment_graph(height * width, edges, c);
 
@@ -124,9 +125,7 @@ std::vector<Edge> Graph::build_graph(const cv::Mat &image)
             }
         }
     }
-
     edges.resize(static_cast<unsigned long>(num));
-
     return edges;
 }
 
@@ -139,13 +138,14 @@ Disjoint Graph::segment_graph(int num_vertices, std::vector<Edge> &edges, float 
     // Threshold is given by user
     std::vector<float> thresholds(static_cast<unsigned long>(num_vertices), c);
 
-    // Itterate each edge over all edges
+    // Iterate each edge over all edges
     /*
      * for each vertex a and b find() each vertex
      * then find if they are withen the threshold for the given forest with it's seed pixel
      * if withen threshold merge elemnts into the forest and compute new threshold 
      * (based on the current edge wight plus the given threshold / forest.size(a))
      */
+    
     for (Edge &edge : edges)
     {
         int a = forest.find(edge.a);
@@ -161,6 +161,6 @@ Disjoint Graph::segment_graph(int num_vertices, std::vector<Edge> &edges, float 
             thresholds[a] = edge.weight + c / forest.size(a);
         }
     }
-    // returnt the forest
+    // return the forest
     return forest;
 }
